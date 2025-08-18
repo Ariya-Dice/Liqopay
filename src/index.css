@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Using !important to force the dark background color */
+html, body, #root {
+  background-color: #111827 !important;
+  @apply min-h-screen text-gray-200;
+}
+
+/* Base styles for the app container */
+#root {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 9rem;
+  text-align: center;
+}
+
+/* Custom animation for the logo */
+@keyframes drawLogo {
+  0% {
+    stroke-dashoffset: 5000;
+  }
+  80% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 0; /* مکث در انتها */
+  }
+}
+
+.logo-path {
+  stroke-dasharray: 500;
+  stroke-dashoffset: 0;
+  animation: moveDash 20s linear infinite;
+}
+
+@keyframes moveDash {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -5000; /* دقیقا طول مسیر */
+  }
+}
+

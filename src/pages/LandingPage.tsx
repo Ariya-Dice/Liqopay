@@ -8,10 +8,15 @@ const LandingPage: React.FC = () => {
   return (
     <div className="bg-gray-900 p-4">
       <div className="max-w-xl mx-auto flex flex-col items-center gap-4">
+        {/* Animated logo */}
         <AnimatedLogo className="w-24 h-24 md:w-28 md:h-28" />
 
-        <h1 className="text-3xl font-bold text-white mb-6">LiqoPay</h1>
+        {/* Title in Hyperliquid green */}
+        <h1 className="text-3xl font-bold mb-6" style={{ color: '#00FF9F' }}>
+          LiqoPay
+        </h1>
 
+        {/* Navigation buttons */}
         <div className="space-y-3">
           <button
             onClick={() => navigate('/buyer')}

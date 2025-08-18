@@ -5,14 +5,17 @@
 /* Using !important to force the dark background color */
 html, body, #root {
   background-color: #111827 !important;
-  @apply min-h-screen text-gray-200;
+  @apply min-h-screen;
+  color: #00FF9F !important; /* Hyperliquid green */
 }
 
 /* Base styles for the app container */
 #root {
   max-width: 500px;
   margin: 0 auto;
-  padding: 9rem;
+  padding-top: 10px; /* Only 10px from top */
+  padding-left: 1rem;
+  padding-right: 1rem;
   text-align: center;
 }
 
@@ -25,7 +28,7 @@ html, body, #root {
     stroke-dashoffset: 0;
   }
   100% {
-    stroke-dashoffset: 0; /* مکث در انتها */
+    stroke-dashoffset: 0; /* Pause at the end */
   }
 }
 
@@ -33,6 +36,7 @@ html, body, #root {
   stroke-dasharray: 500;
   stroke-dashoffset: 0;
   animation: moveDash 20s linear infinite;
+  stroke: #00FF9F; /* Hyperliquid green for the logo path */
 }
 
 @keyframes moveDash {
@@ -40,7 +44,6 @@ html, body, #root {
     stroke-dashoffset: 0;
   }
   100% {
-    stroke-dashoffset: -5000; /* دقیقا طول مسیر */
+    stroke-dashoffset: -5000; /* Exact path length */
   }
 }
-

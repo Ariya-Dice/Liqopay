@@ -64,10 +64,11 @@ const SellerPage = () => {
       >
         {/* Wallet Address Input */}
         <div>
-          <label className="block text-white mb-2">
+          <label htmlFor="walletAddress" className="block text-white mb-2">
             Ethereum/Hyperliquid Wallet Address:
           </label>
           <input
+            id="walletAddress"
             type="text"
             value={walletAddress}
             onChange={(e) => setWalletAddress(e.target.value)}
@@ -79,10 +80,11 @@ const SellerPage = () => {
 
         {/* Currency Selector */}
         <div>
-          <label className="block text-white mb-2">
+          <label htmlFor="currency" className="block text-white mb-2">
             Select Payment Currency:
           </label>
           <select
+            id="currency"
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
             className="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
@@ -95,8 +97,11 @@ const SellerPage = () => {
 
         {/* Amount Input */}
         <div>
-          <label className="block text-white mb-2">Amount (USD):</label>
+          <label htmlFor="usdAmount" className="block text-white mb-2">
+            Amount (USD):
+          </label>
           <input
+            id="usdAmount"
             type="number"
             value={usdAmount}
             onChange={(e) => setUsdAmount(e.target.value)}

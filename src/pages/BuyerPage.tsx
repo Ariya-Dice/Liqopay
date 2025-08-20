@@ -1,96 +1,162 @@
-// src/pages/BuyerPage.tsx
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Html5QrcodeScanner } from 'html5-qrcode';
+import WalletConnection from '../components/WalletConnection';
+import { PaymentInfo } from '../components/WalletConnection';
 
 const BuyerPage: React.FC = () => {
   const navigate = useNavigate();
-  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [scanResult, setScanResult] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const readerRef = useRef<HTMLDivElement>(null);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
-    // This effect runs only once on mount to initialize the scanner.
-    const scanner = new Html5QrcodeScanner(
-      'reader',
-      {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-      },
-      false // verbose
-    );
+    if (!scanResult && readerRef.current) {
+      setIsScanning(true);
 
-    const onScanSuccess = (decodedText: string) => {
-      // The scanner instance is already available in the `scanner` closure.
-      scanner.clear().catch(error => {
-        console.error("Failed to clear scanner after success:", error);
-      });
-      setScanResult(decodedText);
-    };
+      // ایجاد اسکنر و ذخیره در ref
+      scannerRef.current = new Html5QrcodeScanner(
+        readerRef.current.id,
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        false
+      );
 
-    const onScanError = (errorMessage: string) => {
-      // Errors can be ignored as the scanner continues to try.
-    };
+      const onScanSuccess = (decodedText: string) => {
+        // ابتدا اسکنر را پاک کن، سپس state را تغییر بده
+        scannerRef.current?.clear().then(() => {
+          setScanResult(decodedText);
+          setIsScanning(false);
+          
+          // Parse QR code data and create payment info
+          try {
+            const qrData = JSON.parse(decodedText);
+            const paymentData: PaymentInfo = {
+              network: 'ethereum', // Default to ethereum, can be enhanced based on QR data
+              chainId: 1, // Default to mainnet
+              amount: parseFloat(qrData.amount),
+              recipient: qrData.address,
+              token: qrData.currency,
+              invoiceId: `invoice_${Date.now()}`,
+            };
+            
+            setPaymentInfo(paymentData);
+            setShowPayment(true);
+          } catch (error) {
+            console.error('Failed to parse QR code data:', error);
+            setScanResult('Invalid QR code format');
+          }
+        }).catch(err => {
+          console.error("Failed to clear scanner:", err);
+          setScanResult(decodedText);
+          setIsScanning(false);
+        });
+      };
 
-    // Start rendering the scanner.
-    scanner.render(onScanSuccess, onScanError);
+      const onScanError = (errorMessage: string) => {
+        console.warn('QR scan error:', errorMessage);
+      };
 
-    // Cleanup function to ensure the scanner is cleared when the component unmounts.
+      scannerRef.current.render(onScanSuccess, onScanError);
+    }
+
+    // Cleanup هنگام unmount
     return () => {
-      scanner.clear().catch(error => {
-        console.error("Failed to clear scanner on unmount:", error);
+      scannerRef.current?.clear().catch(err => {
+        console.error("Failed to clear scanner on unmount:", err);
       });
     };
-  }, []); // Empty dependency array ensures this runs only once.
+  }, [scanResult]);
+
+  const handleReset = () => {
+    setScanResult('');
+    setPaymentInfo(null);
+    setShowPayment(false);
+    setIsScanning(false);
+    // Restart scanner
+    if (readerRef.current) {
+      setIsScanning(true);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 gap-6 p-4 text-white">
-      <h2 className="text-3xl font-bold mb-6">Buyer Page</h2>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 gap-6 p-4">
+      <h2 className="text-2xl font-bold mb-6">Buyer Page</h2>
 
       <div className="w-full max-w-md space-y-6">
-        {/*
-          The scanner container is now always rendered in the DOM.
-          We use a conditional CSS class to hide it after a scan result is available.
-          This prevents the DOM conflict between React and the scanner library.
-        */}
-        <div
-          id="reader"
-          className={scanResult ? 'hidden' : 'w-full bg-gray-800 rounded-lg border-2 border-dashed border-gray-600 overflow-hidden'}
-        />
-
-        {/* Show scan result if available */}
-        {scanResult && (
-          <div className="w-full p-6 bg-gray-800 rounded-lg text-center animate-fade-in">
-            <p className="text-lg font-semibold text-green-400 mb-4">Scan Successful!</p>
-            <p className="text-sm text-gray-400">Scan Result:</p>
-            <p className="text-xs break-all mt-2 font-mono text-green-300">{scanResult}</p>
+        {/* QR Scanner Container - Show only when not showing payment */}
+        {!showPayment && (
+          <div
+            ref={readerRef}
+            id="reader"
+            className="w-full h-64 bg-gray-800 rounded-lg border-2 border-dashed border-gray-600 flex items-center justify-center overflow-hidden"
+          >
+            {isScanning && !scanResult && (
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p>Scanning...</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Back button */}
-        <button
-          onClick={() => navigate('/')}
-          className="w-full px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-all duration-200"
-        >
-          Back to Home
-        </button>
+        {/* Show scan result if available */}
+        {scanResult && !showPayment && (
+          <div className="w-full p-4 bg-gray-800 rounded-lg">
+            <p className="text-sm">Scan Result:</p>
+            <p className="text-xs break-all mt-2" style={{ color: '#00FF9F' }}>{scanResult}</p>
+          </div>
+        )}
+
+        {/* Payment Section */}
+        {showPayment && paymentInfo && (
+          <div className="w-full p-6 bg-gray-800 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Payment Details</h3>
+            
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between">
+                <span>Amount:</span>
+                <span style={{ color: '#00FF9F' }}>{paymentInfo.amount} {paymentInfo.token}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>To:</span>
+                <span className="text-xs break-all" style={{ color: '#00FF9F' }}>
+                  {paymentInfo.recipient.substring(0, 6)}...{paymentInfo.recipient.substring(-4)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Network:</span>
+                <span style={{ color: '#00FF9F' }}>{paymentInfo.network}</span>
+              </div>
+            </div>
+
+            {/* Wallet Connection Component */}
+            <WalletConnection paymentInfo={paymentInfo} />
+
+            {/* Reset Button */}
+            <button
+              onClick={handleReset}
+              className="w-full mt-4 px-6 py-3 bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Scan New QR Code
+            </button>
+          </div>
+        )}
+
+        {/* Back button - Show only when not in payment mode */}
+        {!showPayment && (
+          <button
+            onClick={() => navigate('/')}
+            className="w-full px-6 py-3 bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            Back
+          </button>
+        )}
       </div>
     </div>
   );
 };
-
-// Simple fade-in animation for the result
-const style = document.createElement('style');
-style.innerHTML = `
-  @keyframes fade-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-fade-in {
-    animation: fade-in 0.5s ease-out forwards;
-  }
-`;
-document.head.appendChild(style);
-
 
 export default BuyerPage;

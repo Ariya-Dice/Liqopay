@@ -1,0 +1,57 @@
+.walletContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.connectButton {
+  background: linear-gradient(135deg, #00FF9F 0%, #00CC7F 100%);
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+}
+
+.connectButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 159, 0.3);
+}
+
+.connectButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.errorMessage {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  font-size: 14px;
+}
+
+.successMessage {
+  color: #00FF9F;
+  background: rgba(0, 255, 159, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 255, 159, 0.3);
+  font-size: 14px;
+}
+
+.successMessage a {
+  color: #00FF9F;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.successMessage a:hover {
+  color: #00CC7F;
+}
